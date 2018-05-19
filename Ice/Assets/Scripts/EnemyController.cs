@@ -3,6 +3,7 @@
 */
 
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemyController : MonoBehaviour {
@@ -12,19 +13,26 @@ public class EnemyController : MonoBehaviour {
     [Range(0f, 1000f)] public float angularSpeed;
     [Range(0f, 100f)] public float damage;
     [Range(0f, 100f)] public float maxHealth;
-    [Range(0f, 10f)] public float invulnerableTime;
 
+    [Header("UI elements")]
+    public Image healthBar;
+    public Canvas healthCanvas;
+    public Image freezeImage;
+    public Sprite[] freezeSprites;
+
+    private int freezeStage;
     private float health;
-    private float invulnerableCount;
     private Transform target;
     private Rigidbody2D rb;
     private AudioController audioController;
 
     public void TakeDamage(float damage) {
-        if (invulnerableCount <= 0) {
-            health -= damage;
-            invulnerableCount = invulnerableTime;
-        }
+        if (health > 0) health -= damage;
+        //print(health);
+
+        freezeStage = Mathf.FloorToInt(Mathf.Lerp(0, freezeSprites.Length - 1, (maxHealth - health) / maxHealth));
+        //freezeStage = Mathf.FloorToInt((maxHealth - health) / maxHealth * freezeSprites.Length);
+        freezeImage.sprite = freezeSprites[freezeStage];
     }
 
     private void Start() {
@@ -42,7 +50,10 @@ public class EnemyController : MonoBehaviour {
     }
 
     private void Update() {
-        if (invulnerableCount > 0) invulnerableCount -= Time.deltaTime;
+        healthBar.fillAmount = health / maxHealth;
+        healthCanvas.transform.rotation = Quaternion.identity;
+
+        freezeImage.transform.localRotation = transform.rotation;
     }
 
     private void FixedUpdate () {
@@ -51,8 +62,8 @@ public class EnemyController : MonoBehaviour {
 
             float rotateAmount = Vector3.Cross(transform.right, dir).z;
 
-            rb.velocity = transform.right * speed;
-            rb.angularVelocity = rotateAmount * angularSpeed;
+            rb.velocity = transform.right * (speed * (freezeSprites.Length - freezeStage) / freezeSprites.Length);
+            rb.angularVelocity = rotateAmount * (angularSpeed * (freezeSprites.Length - freezeStage) / freezeSprites.Length);
         }
 	}
 

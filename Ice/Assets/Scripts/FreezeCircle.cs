@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 public class FreezeCircle : MonoBehaviour {
 
-    [Range(0f, 100f)] public float damage;
+    [Range(0f, 1f)] public float damage;
 
     private void OnTriggerStay2D(Collider2D collision) {
         switch (collision.gameObject.tag) {
