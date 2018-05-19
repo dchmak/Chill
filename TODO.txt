@@ -1,0 +1,6 @@
+TODO:
+add damage to freeze cone
+more mechanics (power-ups...)
+art
+music
+main menu
