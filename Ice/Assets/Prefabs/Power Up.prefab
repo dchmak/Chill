@@ -118,7 +118,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minRadius: 30
   maxRadius: 70
-  power: 5
+  power: 1
+  score: 10
 --- !u!212 &212126054349341038
 SpriteRenderer:
   m_ObjectHideFlags: 1

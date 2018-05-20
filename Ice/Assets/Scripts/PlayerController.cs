@@ -5,6 +5,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -34,16 +35,18 @@ public class PlayerController : MonoBehaviour {
     [Header("Initial Statistics")]
     [Range(0f, 10f)] public float movementSpeed;
     [Range(0f, 10f)] public float freezingMovementSpeed;
+    [Range(0f, 10f)] public float miningMovementSpeed;
     [Range(0f, 100f)] public float maxHealth;
 
     [Header("Freeze settings")]
-    public GameObject freezeConePrefab;
+    public GameObject freezeCone;
     public Transform freezeGun;
     [Range(0f, 1f)] public float freezeGunCost;
     public GameObject freezeCirclePrefab;
     public float freezeCircleTime;
     [Range(0f, 100f)] public float freezeCircleCost;
     [Range(0f, 100f)] public float maxFreezePower;
+    [Range(0f, 100f)] public float mineBonus;
 
     [Header("UI elements")]
     public Canvas canvas;
@@ -58,11 +61,11 @@ public class PlayerController : MonoBehaviour {
 
     private float health;
     private float freezePower;
-    private bool isFreezing;
+    private bool isFreezing, isMining;
     private Vector2 movement;
     private Rigidbody2D rb;
-    private GameObject freezeCone;
     private GameObject powerupArrow;
+    private AudioController audioController;
 
     public void TakeDamage(float damage) {
         if (health > 0) health -= damage;
@@ -76,19 +79,32 @@ public class PlayerController : MonoBehaviour {
 
     public void Recharge(float power) {
         freezePower += power;
+        freezePower = Mathf.Clamp(freezePower, 0, maxFreezePower);
     }
+
+    public void Recharge() {
+        freezePower = maxFreezePower;
+    } // to full
 
     public Upgradable FindUpgradable(string name) {
         return Array.Find(upgradables, upgradable => upgradable.name == name);
     }
 
+    public void SetIsMining(bool mine) {
+        isMining = mine;
+    }
+
 	private void Start () {
+        audioController = AudioController.instance;
+
         rb = GetComponent<Rigidbody2D>();
         health = maxHealth;
         freezePower = maxFreezePower;
 
         powerupArrow = Instantiate(powerupArrowPrefab);
         powerupArrow.transform.SetParent(canvas.transform);
+
+        freezeCone.GetComponent<ParticleSystem>().Stop();
     }
 	
 	private void Update () {
@@ -107,30 +123,24 @@ public class PlayerController : MonoBehaviour {
         float upgradedGunCost = freezeGunCost * costUpgrade.GetScaler();
         float upgradeCircleCost = freezeCircleCost * costUpgrade.GetScaler();
         //print(upgradedGunCost);
-        if (Input.GetMouseButtonDown(0) && freezePower > upgradedGunCost) {
-            //freezeCone = Instantiate(freezeConePrefab, transform.position, Quaternion.identity);
-            freezeCone = Instantiate(freezeConePrefab);
-            freezeCone.transform.SetParent(freezeGun);
-            freezeCone.transform.localPosition = Vector3.zero;
-            freezeCone.transform.localRotation = Quaternion.Euler(0, 90, 90);
-            freezeCone.transform.localScale = new Vector3(1, 1, 1);
-
+        if (Input.GetMouseButtonDown(0) && freezePower > upgradedGunCost) { 
+            freezeCone.GetComponent<ParticleSystem>().Play();
             isFreezing = true;
+            audioController.Play("Freeze gun");
         } // start freezing
         if (Input.GetMouseButton(0) && isFreezing) {
             freezePower -= freezeGunCost;
         } // when using freeze gun
         if (Input.GetMouseButtonUp(0) || freezePower <= 0) {
             freezeCone.GetComponent<ParticleSystem>().Stop();
-            freezeCone.transform.parent = null;
-            freezeCone.transform.localScale = new Vector3(1, 1, 1);
-            Destroy(freezeCone, 5f);
             isFreezing = false;
+            audioController.Stop("Freeze gun");
         } // end freezing
 
         // freeze cone
         if (Input.GetMouseButtonUp(1) && freezePower > upgradeCircleCost) {
             //print((Vector2)ray.origin);
+            audioController.Play("Freeze circle");
             freezePower -= freezeCircleCost;
             GameObject freezeCircle = Instantiate(freezeCirclePrefab, (Vector2)ray.origin, Quaternion.identity);
             Destroy(freezeCircle, freezeCircleTime);
@@ -139,6 +149,7 @@ public class PlayerController : MonoBehaviour {
         // health UI
         healthBar.fillAmount = health / maxHealth;
         canvas.transform.rotation = Quaternion.identity;
+        //print(health);
 
         // freeze power bar
         freezePowerBar.fillAmount = freezePower / maxFreezePower;
@@ -147,6 +158,17 @@ public class PlayerController : MonoBehaviour {
         foreach (Upgradable upgradable in upgradables) {
             upgradable.text.text = "LV: " + upgradable.GetLV().ToString();
         }
+
+        // death
+        if (health <= 0) {
+            SceneManager.LoadSceneAsync("Gameover");
+            audioController.Stop();
+            audioController.Play("Player death");
+        }
+
+        // mining sound
+        if (isMining && !audioController.IsPlaying("Mine")) audioController.Play("Mine");
+        if (!isMining && audioController.IsPlaying("Mine")) audioController.Stop("Mine");
     }
 
     private void FixedUpdate() {
@@ -154,6 +176,7 @@ public class PlayerController : MonoBehaviour {
         Upgradable speedUpgrade = FindUpgradable("Speed");
 
         if (isFreezing) rb.velocity = movement * freezingMovementSpeed * speedUpgrade.GetScaler();
+        else if (isMining) rb.velocity = movement * miningMovementSpeed * speedUpgrade.GetScaler();
         else rb.velocity = movement * movementSpeed * speedUpgrade.GetScaler();
     }
 

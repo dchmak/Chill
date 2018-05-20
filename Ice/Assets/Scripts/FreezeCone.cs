@@ -37,10 +37,22 @@ public class FreezeCone : MonoBehaviour {
 
         ParticlePhysicsExtensions.GetCollisionEvents(ps, collision, collisionEvents);
         foreach (ParticleCollisionEvent collisionEvent in collisionEvents) {
-            EnemyController enemyController = collisionEvent.colliderComponent.gameObject.GetComponent<EnemyController>();
+            Component component = collisionEvent.colliderComponent;
+            if (component == null) Debug.LogWarning("Component does not exist");
+            else {
+                GameObject gameObject = component.gameObject;
+                if (gameObject == null) Debug.LogWarning("Game object does not exist");
+                else {
+                    EnemyController enemyController = gameObject.GetComponent<EnemyController>();
 
-            if (enemyController == null) Debug.LogWarning("Enemy controller does not exist!");
-            else enemyController.TakeDamage(damage * damageScaler);
+                    if (enemyController == null) Debug.LogWarning("Enemy controller does not exist!");
+                    else enemyController.TakeDamage(damage * damageScaler);
+                }
+            }
+            //EnemyController enemyController = collisionEvent.colliderComponent.gameObject.GetComponent<EnemyController>();
+
+            //if (enemyController == null) Debug.LogWarning("Enemy controller does not exist!");
+            //else enemyController.TakeDamage(damage * damageScaler);
         }
     }
 }

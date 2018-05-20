@@ -1,5 +1,1 @@
 TODO:
-more mechanics (except power-ups)
-implement range scaler
-music
-main menu
