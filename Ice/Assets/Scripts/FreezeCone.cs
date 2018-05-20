@@ -12,23 +12,35 @@ public class FreezeCone : MonoBehaviour {
 
     private List<ParticleCollisionEvent> collisionEvents;
     private ParticleSystem ps;
+    private GameObject player;
 
     private void Start () {
         collisionEvents = new List<ParticleCollisionEvent>();
     }
-	
-	private void Update () {
-
-    }
 
     private void OnParticleCollision(GameObject collision) {
+        float damageScaler = 1f;
+
+        player = GameObject.FindGameObjectWithTag("Player");
+        PlayerController controller = player.GetComponent<PlayerController>();
+
+        if (controller == null) Debug.LogWarning("Player controller does not exist!");
+        else {
+            PlayerController.Upgradable damageUpgrade = controller.FindUpgradable("Damage");
+            if (damageUpgrade == null) Debug.LogWarning("The upgrade does not exist!");
+            else {
+                damageScaler = damageUpgrade.GetScaler();
+            }
+        }
+
         ps = GetComponent<ParticleSystem>();
 
         ParticlePhysicsExtensions.GetCollisionEvents(ps, collision, collisionEvents);
         foreach (ParticleCollisionEvent collisionEvent in collisionEvents) {
             EnemyController enemyController = collisionEvent.colliderComponent.gameObject.GetComponent<EnemyController>();
 
-            enemyController.TakeDamage(damage);
+            if (enemyController == null) Debug.LogWarning("Enemy controller does not exist!");
+            else enemyController.TakeDamage(damage * damageScaler);
         }
     }
 }

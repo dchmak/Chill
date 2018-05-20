@@ -39,12 +39,7 @@ public class EnemyController : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
         health = maxHealth;
 
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        if (players.Length == 0) {
-            print("Nothing to follow");
-        } else { 
-            target = GetClosestObject(players);
-        }
+        target = GameObject.FindGameObjectWithTag("Player").transform;
 
         audioController = FindObjectOfType<AudioController>();
     }
@@ -69,25 +64,10 @@ public class EnemyController : MonoBehaviour {
 
     private void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.tag == "Player") {
-            PlayerController player = collision.gameObject.GetComponent<PlayerController>();
-            player.TakeDamage(damage);
-        }
-    }
-
-    Transform GetClosestObject(GameObject[] obj) {
-        Transform bestTarget = null;
-        float closestDistanceSqr = Mathf.Infinity;
-        Vector3 currentPosition = transform.position;
-
-        foreach (GameObject potentialTarget in obj) {
-            Vector3 directionToTarget = potentialTarget.transform.position - currentPosition;
-            float dSqrToTarget = directionToTarget.sqrMagnitude;
-            if (dSqrToTarget < closestDistanceSqr) {
-                closestDistanceSqr = dSqrToTarget;
-                bestTarget = potentialTarget.transform;
+            if (freezeStage != freezeSprites.Length - 1) {
+                PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+                player.TakeDamage(damage);
             }
         }
-
-        return bestTarget;
     }
 }

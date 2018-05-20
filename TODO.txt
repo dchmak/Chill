@@ -1,5 +1,5 @@
 TODO:
-more mechanics (power-ups...)
-more art
+more mechanics (except power-ups)
+implement range scaler
 music
 main menu

@@ -29,7 +29,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1276557324749294
 GameObject:
   m_ObjectHideFlags: 1
@@ -91,7 +91,7 @@ GameObject:
   - component: {fileID: 114539134118142488}
   - component: {fileID: 114676435257479206}
   m_Layer: 9
-  m_Name: Health Canvas
+  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -154,7 +154,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -177,11 +177,32 @@ MonoBehaviour:
   freezeConePrefab: {fileID: 1585617556760560, guid: 24320180b4548a54ea2b0a47b4dea134,
     type: 2}
   freezeGun: {fileID: 4806913158788972}
+  freezeGunCost: 0.1
   freezeCirclePrefab: {fileID: 1456753270377258, guid: 8277ce8af712ba04b8015850ee721e1b,
     type: 2}
-  freezeCircleTime: 0
+  freezeCircleTime: 2
+  freezeCircleCost: 20
+  maxFreezePower: 100
+  canvas: {fileID: 223874522980381938}
   healthBar: {fileID: 114697490567327524}
-  healthCanvas: {fileID: 223874522980381938}
+  freezePowerBar: {fileID: 0}
+  powerupArrowPrefab: {fileID: 1997395660714516, guid: afbd5b7d541e6854fbef1f15f942d001,
+    type: 2}
+  hidePowerupArrowRadius: 5
+  powerupArrowRadius: 20
+  upgradables:
+  - name: Cost
+    text: {fileID: 0}
+    baseScaler: 0.9
+  - name: Range
+    text: {fileID: 0}
+    baseScaler: 1.1
+  - name: Damage
+    text: {fileID: 0}
+    baseScaler: 1.1
+  - name: Speed
+    text: {fileID: 0}
+    baseScaler: 1.1
 --- !u!114 &114503736594484398
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -306,7 +327,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1524192937
-  m_SortingLayer: 3
+  m_SortingLayer: 2
   m_SortingOrder: 100
   m_Sprite: {fileID: 21300000, guid: 66403ef2f534f59448f3bd7c44a584ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
